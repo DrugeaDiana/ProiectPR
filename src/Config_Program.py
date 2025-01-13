@@ -110,6 +110,7 @@ while True:
     print("1. Sunset/Sunrise")
     print("2. Specific time")
     print("3. Exit")
+
     message = input("Enter the number of the configuration you want to set: ")
     if message == "1":
         delta_sunset = input("How many minutes after sunset should the lights turn on? ")
