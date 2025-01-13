@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 #from tabulate import tabulate
 import pandas as pd
+import ssl, time, inspect, os
 database = pd.read_csv("database.csv")
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
@@ -54,7 +55,9 @@ def on_message(client, userdata, msg):
     global database
     database = pd.concat([database, df_dict], ignore_index=True)
 
-mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "Database")
+mqttc.tls_set(ca_certs="ca.crt", tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+mqttc.tls_insecure_set(True)
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message
 mqttc.on_subscribe = on_subscribe

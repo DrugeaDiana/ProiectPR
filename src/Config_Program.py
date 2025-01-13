@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import requests
 import json
 import datetime
-
+import ssl, time, inspect, os
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
     # Since we subscribed only for a single channel, reason_code_list contains
     # a single entry
@@ -93,7 +93,9 @@ def sunset_sunrise_calc(delta_sunset, delta_sunrise):
     }
     return json_data
 
-mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "Config")
+mqttc.tls_set(ca_certs="ca.crt", tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+mqttc.tls_insecure_set(True)
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message
 mqttc.on_subscribe = on_subscribe
@@ -101,7 +103,7 @@ mqttc.on_unsubscribe = on_unsubscribe
 mqttc.on_message = on_message
 
 mqttc.user_data_set([])
-mqttc.connect("192.168.0.199", 1883)
+mqttc.connect("192.168.43.212", 8883)
 
 unacked_publish = set()
 mqttc.loop_start()
@@ -134,7 +136,7 @@ while True:
         break
     else:
         print("Invalid input")
-        print("/n")
+        print("\n")
         continue
     #msg_info = mqttc.publish("config/system", message, qos=1)
     #msg_info.wait_for_publish()
