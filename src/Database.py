@@ -1,6 +1,9 @@
 import paho.mqtt.client as mqtt
-
-database = []
+import json
+from datetime import datetime
+#from tabulate import tabulate
+import pandas as pd
+database = pd.read_csv("database.csv")
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
     # Since we subscribed only for a single channel, reason_code_list contains
@@ -29,7 +32,27 @@ def on_connect(client, userdata, flags, reason_code, properties):
         client.subscribe("info/activity")
 
 def on_message(client, userdata, msg):
-    database.append(str(msg.payload))
+    payload = msg.payload.decode('utf-8')
+    json_payload = json.loads(payload)
+
+    if "Time" not in json_payload or "Sensor" not in json_payload:
+        print("Invalid message")
+        return
+    
+    time_str = json_payload["Time"]
+    sensor = json_payload["Sensor"]
+    
+    time_obj = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S%z")
+    day = time_obj.strftime("%Y-%m-%d")
+    time = time_obj.strftime("%H:%M:%S")
+    dictionary = {
+        "Day": day,
+        "Time": time,
+        "Sensor": sensor
+    }
+    df_dict = pd.DataFrame([dictionary])
+    global database
+    database = pd.concat([database, df_dict], ignore_index=True)
 
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqttc.on_connect = on_connect
@@ -39,16 +62,35 @@ mqttc.on_unsubscribe = on_unsubscribe
 
 
 mqttc.user_data_set([])
-mqttc.connect("ip-ul laptopului", 1883)
+mqttc.connect("192.168.0.199", 1883)
 
 unacked_publish = set()
 mqttc.loop_start()
 while True:
-    command = input()
-    if command eq "exit":
+    print("Available commands: show, show_day, show_sensor, show_sensor_day, exit")
+    command = input("Enter a command: ")
+    if command.__eq__("exit"):
+        database.to_csv("database.csv", index=False)
+        print("Database was saved in database.csv")
         break
-    if command eq "show":
+    elif command.__eq__("show"):
         print(database)
-    #print(f"Received the following message: {mqttc.user_data_get()}")
+        print("\n")
+    elif command.__eq__("show_day"):
+        day = input("Enter the day(YYYY-MM-DD): ")
+        print(database[database["Day"] == day])
+        print("\n")
+    elif command.__eq__("show_sensor"):
+        sensor = input("Enter the sensor: ")
+        print(database[database["Sensor"] == sensor])
+        print("\n")
+    elif command.__eq__("show_sensor_day"):
+        sensor = input("Enter the sensor: ")
+        day = input("Enter the day(YYYY-MM-DD): ")
+        print(database[(database["Sensor"] == sensor) & (database["Day"] == day)])
+        print("\n")
+    else:
+        print("Invalid command")
+        print("\n")
 
 mqttc.loop_stop()
