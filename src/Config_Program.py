@@ -63,8 +63,8 @@ def fetch_data(latitude, longitude, tzid):
             sunset = data['results']['sunset']
             
             # Afișează informațiile
-            print(f"Sunrise: {sunrise}")
-            print(f"Sunset: {sunset}")
+            #print(f"Sunrise: {sunrise}")
+            #print(f"Sunset: {sunset}")
             sunrise_time = datetime.datetime.fromisoformat(sunrise)
             sunset_time = datetime.datetime.fromisoformat(sunset)
             return sunrise_time, sunset_time
@@ -117,12 +117,23 @@ while True:
         config_message = sunset_sunrise_calc(delta_sunset, delta_sunrise)
         msg_info = mqttc.publish("config/system", json.dumps(config_message), qos=1)
         msg_info.wait_for_publish()
+        print("/n")
     elif message == "2":
-        message = "Specific time"
+        activation_time = input("Enter the activation time(format %Y-%m-%dT%H:%M:%S%z): ")
+        deactivation_time = input("Enter the deactivation time(format %Y-%m-%dT%H:%M:%S%z): ")
+        config_message = {
+            "Activation": activation_time,
+            "Deactivation": deactivation_time
+        }
+        msg_info = mqttc.publish("config/system", json.dumps(config_message), qos=1)
+        msg_info.wait_for_publish()
+        print("/n")
     elif message == "3":
+        print("Exiting the program")
         break
     else:
         print("Invalid input")
+        print("/n")
         continue
     #msg_info = mqttc.publish("config/system", message, qos=1)
     #msg_info.wait_for_publish()
