@@ -36,14 +36,14 @@ def on_message(client, userdata, msg):
     payload = msg.payload.decode('utf-8')
     json_payload = json.loads(payload)
 
-    if "Time" not in json_payload or "Sensor" not in json_payload:
+    if "Time" not in json_payload or "Senzor" not in json_payload:
         print("Invalid message")
         return
     
     time_str = json_payload["Time"]
-    sensor = json_payload["Sensor"]
+    sensor = json_payload["Senzor"]
     
-    time_obj = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S%z")
+    time_obj = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
     day = time_obj.strftime("%Y-%m-%d")
     time = time_obj.strftime("%H:%M:%S")
     dictionary = {
@@ -65,31 +65,40 @@ mqttc.on_unsubscribe = on_unsubscribe
 
 
 mqttc.user_data_set([])
-mqttc.connect("192.168.0.199", 1883)
+mqttc.connect("192.168.43.212", 8883)
 
 unacked_publish = set()
 mqttc.loop_start()
 while True:
-    print("Available commands: show, show_day, show_sensor, show_sensor_day, exit")
-    command = input("Enter a command: ")
-    if command.__eq__("exit"):
+    print("Available commands:")
+    print("1. Show")
+    print("2. Show data from a specific day")
+    print("3. Show data from a specific sensor")
+    print("4. Show data from a specific sensor from a specific day")
+    print("5. Exit")
+    command = input("Enter the number of a command: ")
+    if command == "5":
         database.to_csv("database.csv", index=False)
         print("Database was saved in database.csv")
         break
-    elif command.__eq__("show"):
+    elif command == "1":
+        print('\n')        
         print(database)
         print("\n")
-    elif command.__eq__("show_day"):
+    elif command == "2":
         day = input("Enter the day(YYYY-MM-DD): ")
+        print('\n')
         print(database[database["Day"] == day])
         print("\n")
-    elif command.__eq__("show_sensor"):
+    elif command == "3":
         sensor = input("Enter the sensor: ")
+        print('\n')
         print(database[database["Sensor"] == sensor])
         print("\n")
-    elif command.__eq__("show_sensor_day"):
+    elif command == "4":
         sensor = input("Enter the sensor: ")
         day = input("Enter the day(YYYY-MM-DD): ")
+        print('\n')
         print(database[(database["Sensor"] == sensor) & (database["Day"] == day)])
         print("\n")
     else:

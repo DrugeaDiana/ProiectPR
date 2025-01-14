@@ -20,11 +20,6 @@ def on_unsubscribe(client, userdata, mid, reason_code_list, properties):
         print(f"Broker replied with failure: {reason_code_list[0]}")
     client.disconnect()
 
-def on_message(client, userdata, message):
-    # userdata is the structure we choose to provide, here it's a list()
-    userdata.append(message.payload)
-    # We only want to process 10 messages
-
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code.is_failure:
         print(f"Failed to connect: {reason_code}. loop_forever() will retry connection")
@@ -88,8 +83,8 @@ def sunset_sunrise_calc(delta_sunset, delta_sunrise):
     print(f"Deactivation hour: {sunrise_hour}")
     print(f"Activation hour: {sunset_hour}")
     json_data = {
-        "Activation": sunset_hour.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "Deactivation": sunrise_hour.strftime("%Y-%m-%dT%H:%M:%S%z")
+        "Activation": sunset_hour.strftime("%Y-%m-%dT%H:%M:%S"),
+        "Deactivation": sunrise_hour.strftime("%Y-%m-%dT%H:%M:%S")
     }
     return json_data
 
