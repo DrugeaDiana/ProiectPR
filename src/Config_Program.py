@@ -30,10 +30,6 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 def on_message(client, userdata, msg):
     print(msg.topic+" "+msg.payload.decode('utf-8'))
-    topic_string = msg.topic.split("/")
-    subject = topic_string[0]
-    action = topic_string[1]
-    print(subject + " " + action + " checking splitting")
 
 def fetch_data(latitude, longitude, tzid):
     url = "https://api.sunrise-sunset.org/json"
@@ -58,8 +54,6 @@ def fetch_data(latitude, longitude, tzid):
             sunset = data['results']['sunset']
             
             # Afișează informațiile
-            #print(f"Sunrise: {sunrise}")
-            #print(f"Sunset: {sunset}")
             sunrise_time = datetime.datetime.fromisoformat(sunrise)
             sunset_time = datetime.datetime.fromisoformat(sunset)
             return sunrise_time, sunset_time
@@ -90,6 +84,7 @@ def sunset_sunrise_calc(delta_sunset, delta_sunrise):
 
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "Config")
 mqttc.tls_set(ca_certs="ca.crt", tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+mqttc.username_pw_set("proiect", "1234")
 mqttc.tls_insecure_set(True)
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message

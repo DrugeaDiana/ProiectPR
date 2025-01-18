@@ -58,6 +58,7 @@ def on_message(client, userdata, msg):
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "Database")
 mqttc.tls_set(ca_certs="ca.crt", tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
 mqttc.tls_insecure_set(True)
+mqttc.username_pw_set("proiect", "1234")
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message
 mqttc.on_subscribe = on_subscribe

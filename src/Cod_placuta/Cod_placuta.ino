@@ -17,8 +17,8 @@ const char *password = "Yuki1234";   // Replace with your WiFi password
 const char *mqtt_broker = "192.168.43.212";
 const char *mqtt_topic = "config/system";
 const char *mqtt_send_topic = "info/activity";
-const char *mqtt_username = "user";
-const char *mqtt_password = "pass";
+const char *mqtt_username = "proiect";
+const char *mqtt_password = "1234";
 const int mqtt_port = 8883;
 
 // WiFi and MQTT client initialization
@@ -26,7 +26,6 @@ WiFiClientSecure esp_client;
 PubSubClient mqtt_client(esp_client);
 
 // Root CA Certificate
-// Load DigiCert Global Root G2, which is used by EMQX Public Broker: broker.emqx.io
 const char *ca_cert = R"EOF(
 -----BEGIN CERTIFICATE-----
 MIID4zCCAsugAwIBAgIUDJUPYkFY4QP6rxuYjPJpuSn+lzswDQYJKoZIhvcNAQEL
@@ -79,9 +78,9 @@ int senzor_2_message = 0;
 void IRAM_ATTR pir_1() {
   if (connected == 1) {
      motion_1 = 1;
-     Serial.println("Object Detected_1 things conencted");
+     Serial.println("Object Detected_1 things connected");
   } else {
-    Serial.println("Object Detected_1 nothing conencted");
+    Serial.println("Object Detected_1 nothing connected");
   }
   senzor_1_message = 1;
 }
@@ -141,7 +140,6 @@ void connectToMQTT() {
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
             mqtt_client.subscribe(mqtt_topic);
-            //mqtt_client.publish(mqtt_topic, "{\"Time\": \"2025-01-13T09:30:15+0200\", \"Senzor\": \"Curte\"}");  // Publish message upon connection
         } else {
             Serial.print("Failed to connect to MQTT broker, rc=");
             Serial.print(mqtt_client.state());
@@ -159,12 +157,14 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     memcpy(messageBuffer, payload, length);   //copy the payload into the array
     messageBuffer[length] = '\0';
     Serial.printf("%s\n", messageBuffer);
+
     StaticJsonDocument<300> doc;
     DeserializationError error = deserializeJson(doc, messageBuffer);
     const char* activation = doc["Activation"];
     const char* deactivation = doc["Deactivation"];
     Serial.printf("Deactivation: %s\n", activation);
     Serial.printf("Activation: %s\n", deactivation);
+
     parse_time(activation, deactivation);
     Serial.print("Ora activare: "); Serial.println(start_time.tm_hour);
     Serial.print("Minute activare: "); Serial.println(start_time.tm_min);
@@ -180,8 +180,8 @@ void parse_time(const char *activation, const char *deactivation) {
          &start_time.tm_hour, 
          &start_time.tm_min, 
          &start_time.tm_sec);
-    start_time.tm_year -= 1900; // Anul este calculat față de 1900
-    start_time.tm_mon -= 1;     // Lunile sunt de la 0 (ianuarie) la 11 (decembrie)
+    start_time.tm_year -= 1900;
+    start_time.tm_mon -= 1;     
     start_time.tm_isdst = -1;
 
     sscanf(deactivation, "%4d-%2d-%2dT%2d:%2d:%2d", 
@@ -191,8 +191,8 @@ void parse_time(const char *activation, const char *deactivation) {
          &end_time.tm_hour, 
          &end_time.tm_min, 
          &end_time.tm_sec);
-    end_time.tm_year -= 1900; // Anul este calculat față de 1900
-    end_time.tm_mon -= 1;     // Lunile sunt de la 0 (ianuarie) la 11 (decembrie)
+    end_time.tm_year -= 1900;
+    end_time.tm_mon -= 1;    
     end_time.tm_isdst = -1;
 }
 
@@ -270,7 +270,7 @@ void loop() {
       if (connected == 1 && motion_1 == 1 && startTimer_1 == false) {
           for (int i = 0; i < LED_COUNT/2; i++) {      
               strip.setPixelColor(i, strip.Color(0, 0, 255));
-          }  // Red color (RGB values)
+          }
           
           strip.show();
           Serial.println("Object Detected_1");
@@ -283,7 +283,7 @@ void loop() {
       {
         Serial.println("Turning OFF the LED 1" );
         for (int i = 0; i < LED_COUNT/2; i++) {
-          strip.setPixelColor(i, strip.Color(0, 0, 0));  // Red color (RGB values)
+          strip.setPixelColor(i, strip.Color(0, 0, 0));
         }
         strip.show();
         startTimer_1 = false;
